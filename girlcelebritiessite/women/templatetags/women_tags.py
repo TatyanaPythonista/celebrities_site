@@ -7,7 +7,7 @@ register = template.Library()
 @register.simple_tag(name='get_categories') # можно указать любое имя ииспользовать его в шаблонах
 def get_categories(filter=None):
     if filter:
-        return Category.objects.filter(pk=filter)
+        return Category.objects.filter(slug=filter)
     return Category.objects.all()
 
 
