@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>{{ title }}</h1>
-<form action="{% url 'add_page' %}" method="post">
+<form action="{% url 'add_page' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
 <!--    {{ form.as_p }}-->
 
@@ -10,7 +10,7 @@
 
     {% for element in form %}
         <p><label class="form-label" for="{{ element.id_for_label }}">{{ element.label }}</label>{{ element }}</p>
-        <div class="form-errors">{{ element.errors }}</div>
+        <div class="form-error">{{ element.errors }}</div>
     {% endfor %}
     <button type="submit">Добавить</button>
 </form>
