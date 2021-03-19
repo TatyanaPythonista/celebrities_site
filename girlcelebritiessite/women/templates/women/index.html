@@ -2,7 +2,7 @@
 
 {% block content %}
 <ul class="list-articles">
-	{% for post in posts %}
+	{% for post in posts%}
 		<li><div class="article-panel">
 			<p class="first">Категория: {{ post.category }}</p>
 			<p class="last">Дата: {{ post.time_update|date:"d-m-Y H:i:s" }}</p>
