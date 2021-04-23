@@ -3,11 +3,11 @@ from django.contrib.auth.views import LoginView
 from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-from .forms import RegistrationUserForm, AddPostForm, LoginUserForm
+from .forms import RegistrationUserForm, AddPostForm, LoginUserForm, ContactForm
 from .models import *
 from .utils import DataMixin, menu
 
@@ -25,7 +25,7 @@ class WomenHome(DataMixin, ListView):
         return dict(list(context.items()) + list(context_def.items()))
 
     def get_queryset(self):
-        return Women.objects.filter(is_published=True)
+        return Women.objects.filter(is_published=True).select_related('category')
 
 
 #@login_required - как LoginRequiredMixin только для функций
@@ -57,9 +57,22 @@ class ShowPost(DataMixin, DetailView):
         return dict(list(context.items()) + list(context_def.items()))
 
 
-def contact(request):
-    return HttpResponse('Обратная связь.')
+# def contact(request):
+#     return HttpResponse('Обратная связь.')
 
+class ContactFormView(DataMixin, FormView):
+    form_class = ContactForm
+    template_name = 'women/contact.html'
+    success_url = reverse_lazy('home')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context_def = self.get_user_context(title='Обратная связь')
+        return dict(list(context.items()) + list(context_def.items()))
+
+    def form_valid(self, form):
+        print(form.cleaned_data)
+        return redirect('home')
 
 def pageNotFound(request, exception):
     return HttpResponseNotFound('<h1>Страница не найдена</h1>')
@@ -72,12 +85,13 @@ class WomenCategory(DataMixin, ListView):
     allow_empty = False
 
     def get_queryset(self):
-        return Women.objects.filter(category__slug=self.kwargs['category_slug'], is_published=True)
+        return Women.objects.filter(category__slug=self.kwargs['category_slug'], is_published=True).select_related('category')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context_def = self.get_user_context(title='Категория - ' + str(context['posts'][0].category),
-                                            category_selected=context['posts'][0].category_id)
+        category = Category.objects.get(slug=self.kwargs['category_slug'])
+        context_def = self.get_user_context(title='Категория - ' + str(category.name),
+                                            category_selected=category.pk)
         return dict(list(context.items()) + list(context_def.items()))
 
 
